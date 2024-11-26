@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int           @id @default(autoincrement())
+  name          String
+  email         String        @unique
+  password_hash String
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+  reminder      Reminder[]
+  medication    Medication[]
+  progress_log  ProgressLog[]
+  inventroy     Inventory?
+  status       Status    @default(Inactive)
+}
+
+enum Status {
+  Active 
+  Inactive 
+  Suspend 
+}
+model Medication {
+  id           Int           @id @default(autoincrement())
+  reminder     Reminder[]
+  progress_log ProgressLog[]
+  inventory    Inventory?
+  user         User          @relation(fields: [user_id], references: [id])
+  user_id      Int           @unique
+  description  String?
+  dose         String
+  frequency    String
+  start_at     DateTime
+  end_at       DateTime
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+}
+
+model Reminder {
+  id            Int        @id @default(autoincrement())
+  medication    Medication @relation(fields: [medication_id], references: [id])
+  user          User       @relation(fields: [user_id], references: [id])
+  medication_id Int        @unique
+  user_id       Int        @unique
+  time          DateTime
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  status        String
+  repeat        String
+}
+
+model ProgressLog {
+  id            Int        @id @default(autoincrement())
+  user          User       @relation(fields: [user_id], references: [id])
+  medication    Medication @relation(fields: [medication_id], references: [id])
+  user_id       Int        @unique
+  medication_id Int        @unique  
+  date          DateTime
+  status        String
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+}
+
+model Inventory {
+  id            Int        @id @default(autoincrement())
+  user          User       @relation(fields: [user_id], references: [id])
+  medication    Medication @relation(fields: [medication_id], references: [id])
+  user_id       Int        @unique  
+  medication_id Int        @unique
+  quantity      Int
+  threshold     Int
+  ccreated_at   DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+}
