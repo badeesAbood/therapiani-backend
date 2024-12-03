@@ -23,7 +23,6 @@ model User {
   reminder      Reminder[]
   medication    Medication[]
   progress_log  ProgressLog[]
-  inventroy     Inventory?
   status       Status    @default(Inactive)
 }
 
@@ -38,7 +37,7 @@ model Medication {
   progress_log ProgressLog[]
   inventory    Inventory?
   user         User          @relation(fields: [user_id], references: [id])
-  user_id      Int           @unique
+  user_id      Int          
   description  String?
   dose         String
   frequency    String
@@ -52,8 +51,8 @@ model Reminder {
   id            Int        @id @default(autoincrement())
   medication    Medication @relation(fields: [medication_id], references: [id])
   user          User       @relation(fields: [user_id], references: [id])
-  medication_id Int        @unique
-  user_id       Int        @unique
+  medication_id Int        
+  user_id       Int
   time          DateTime
   created_at    DateTime   @default(now())
   updated_at    DateTime   @updatedAt
@@ -65,8 +64,8 @@ model ProgressLog {
   id            Int        @id @default(autoincrement())
   user          User       @relation(fields: [user_id], references: [id])
   medication    Medication @relation(fields: [medication_id], references: [id])
-  user_id       Int        @unique
-  medication_id Int        @unique  
+  user_id       Int        
+  medication_id Int       
   date          DateTime
   status        String
   created_at    DateTime   @default(now())
@@ -75,9 +74,8 @@ model ProgressLog {
 
 model Inventory {
   id            Int        @id @default(autoincrement())
-  user          User       @relation(fields: [user_id], references: [id])
   medication    Medication @relation(fields: [medication_id], references: [id])
-  user_id       Int        @unique  
+  user_id       Int        
   medication_id Int        @unique
   quantity      Int
   threshold     Int

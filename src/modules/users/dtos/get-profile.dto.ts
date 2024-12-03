@@ -3,6 +3,6 @@ import { CreateUserDto } from "./create-user.dto";
 
 
 
-export class GetProfileDto extends PartialType(CreateUserDto) {
+export class GetProfileResponse extends PartialType(CreateUserDto) {
 
 }

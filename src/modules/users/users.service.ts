@@ -6,7 +6,7 @@ import { compare, hash } from "bcrypt";
 import { UpdateUsertDto } from "./dtos/update-user.dto";
 import { LoginResponse, UserPayload } from "./interfaces/users-login.interface";
 import { JwtService } from "@nestjs/jwt";
-import { GetProfileDto } from "./dtos/get-profile.dto";
+import { GetProfileResponse } from "./dtos/get-profile.dto";
 
 @Injectable()
 export class UsersService {
@@ -56,22 +56,32 @@ export class UsersService {
   async loginUser(user: User): Promise<LoginResponse> {
     try {
       // find user by email
-      const payload: UserPayload = {
-        // create payload for JWT
-        sub: user.id, // sub is short for subject. It is the user id
-        email: user.email,
-        name: user.name,
-      };
+      const accessToken = await this.accessToken({ email : user.email , name: user.name , sub: user.id}); 
+
+      const refreshToken = await this.refreshToken({ email : user.email , name: user.name , sub: user.id}); 
 
       return {
-        access_token: await this.jwtService.signAsync(payload),
-        refresh_token: ''
+        access_token: accessToken , 
+        refresh_token:  refreshToken , 
       };
+
     } catch (error) {
       // throw error if any
       throw new HttpException(error, 500);
     }
   }
+
+
+  // handling tokens 
+  async accessToken(payload : UserPayload) : Promise<string> {
+    return await this.jwtService.signAsync(payload , {expiresIn: '30m' , secret : process.env.JWT_ACCESS_SECRET}) ; 
+  }
+
+  async refreshToken(payload : UserPayload) : Promise<string> {
+    return await this.jwtService.signAsync(payload , {expiresIn: '7d' , secret: process.env.JWT_REFRESH_SECRET}) ; 
+  }
+
+
 
   async updateUser(id: number, updateUserDto: UpdateUsertDto): Promise<User> {
     try {
@@ -119,7 +129,7 @@ export class UsersService {
   }
 
 
-  async myProfile(token: string ) : Promise<GetProfileDto> {
+  async myProfile(token: string ) : Promise<GetProfileResponse> {
     try {
 
       const payload = this.jwtService.decode(token.split(' ')[1]) as UserPayload

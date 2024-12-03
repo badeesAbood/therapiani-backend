@@ -5,6 +5,6 @@ import { PrismaService } from 'src/core/services/prisma.service';
 @Module({
     providers: [RemindersService, PrismaService],
     controllers:[RemindersController] ,
-    imports: []
+    exports: [RemindersService]
 })
 export class RemindersModule {}

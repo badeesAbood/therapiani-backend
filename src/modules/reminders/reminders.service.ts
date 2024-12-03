@@ -9,18 +9,17 @@ import { FetchRemindersDto } from "./dtos/fetch-reminders.dto";
 export class RemindersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createReminder(createReminderDto: CreateReminderDto): Promise<Reminder> {
+  async createReminders(createReminderDto: CreateReminderDto[], medId: number, userId: number): Promise<Reminder[]> {
     try {
-      await this.prisma.medication.findUniqueOrThrow({ where: { id: createReminderDto.medication_id } });
+      await this.prisma.medication.findUniqueOrThrow({ where: { id: medId } });
 
-      await this.prisma.user.findUniqueOrThrow({ where: { id: createReminderDto.user_id } });
-
-      const newReminder = await this.prisma.reminder.create({
-        data: {
-          created_at: new Date(Date.now()),
-          updated_at: new Date(Date.now()),
-          ...createReminderDto,
-        },
+      createReminderDto.forEach(dto => {
+        dto.medication_id = medId;
+        dto.user_id = userId;
+      });
+      
+      const newReminder = await this.prisma.reminder.createManyAndReturn({
+        data: createReminderDto,
       });
 
       return newReminder;
@@ -53,8 +52,7 @@ export class RemindersService {
       await this.prisma.reminder.delete({ where: { id } });
 
       return `Reminder with the id ${id} was deleted`;
-    } catch (error) {
-    }
+    } catch (error) {}
   }
 
   async getAllReminders(fetchRemindersDto: FetchRemindersDto): Promise<Reminder[]> {
@@ -63,19 +61,17 @@ export class RemindersService {
 
       return reminders;
     } catch (error) {
-        throw new HttpException(error, 500);
+      throw new HttpException(error, 500);
     }
   }
 
-
-  async getReminder(id: number) : Promise<Reminder> {
+  async getReminder(id: number): Promise<Reminder> {
     try {
-        const reminder = await this.prisma.reminder.findUniqueOrThrow({where: {id}});
-  
-        return reminder;
+      const reminder = await this.prisma.reminder.findUniqueOrThrow({ where: { id } });
 
-      } catch (error) {
-          throw new HttpException(error, 500);
-      }
+      return reminder;
+    } catch (error) {
+      throw new HttpException(error, 500);
+    }
   }
 }

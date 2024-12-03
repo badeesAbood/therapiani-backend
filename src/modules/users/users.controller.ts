@@ -3,10 +3,8 @@ import { CreateUserDto } from "./dtos/create-user.dto";
 import { UpdateUsertDto } from "./dtos/update-user.dto";
 import { UsersService } from "./users.service";
 import { User } from "@prisma/client";
-import { LocalGuard } from "src/auth/guards/local.guard";
-import { AuthGuard } from "@nestjs/passport";
 import { JwtAuthGuard } from "src/auth/guards/jwt.guard";
-import { GetProfileDto } from "./dtos/get-profile.dto";
+import { GetProfileResponse } from "./dtos/get-profile.dto";
 import { Request } from "express";
 
 
@@ -21,7 +19,7 @@ export class UsersController {
   }
 
   @Get('me') 
-  me(@Req() req : Request) :Promise<GetProfileDto> {
+  me(@Req() req : Request) :Promise<GetProfileResponse> {
     return this.usersService.myProfile(req.headers.authorization) ; 
   }
 

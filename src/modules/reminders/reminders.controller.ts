@@ -10,12 +10,6 @@ export class RemindersController {
     constructor(private remindersService: RemindersService){}
 
 
-    @Post("create") 
-    async create(@Body() createReminderDto :CreateReminderDto) : Promise<Reminder> {
-
-        return this.remindersService.createReminder(createReminderDto) ;
-    }
-
 
     @Patch(':id')
     async update(@Param('id', ParseIntPipe) id: number  , @Body() updateReminderDto: UpdateReminderDto) : Promise<Reminder> {

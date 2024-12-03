@@ -10,15 +10,11 @@ import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
 
 @Module({
   imports: [
+    AuthModule,
     UsersModule,
     MedicationsModule,
     RemindersModule,
-    AuthModule,
-    JwtModule.register({
-      global: true,
-      secret: 'bad@@##services',
-      signOptions: { expiresIn: '1h' },
-    }),
+    JwtModule.register({global: true}),
 ],
 exports: [PrismaService] ,
 providers: [PrismaService ,JwtStrategy]
