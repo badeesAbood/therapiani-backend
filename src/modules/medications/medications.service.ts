@@ -8,6 +8,8 @@ import { RemindersService } from "../reminders/reminders.service";
 import { CreateReminderDto } from "../reminders/dtos/create-reminder.dto";
 import { CreateInventroyDto } from "../inventories/dtos/create-inventory.dto";
 import { InventoriesService } from "../inventories/inventories.service";
+import { ProgresslogsService } from "../progresslogs/progresslogs.service";
+import { CreateProgressLogDto } from "../progresslogs/dtos/create-progresslog.dto";
 
 @Injectable()
 export class MedicationsService {
@@ -15,9 +17,15 @@ export class MedicationsService {
     private prisma: PrismaService,
     private reminderService: RemindersService,
     private inventoryService: InventoriesService,
+    private progressLogService: ProgresslogsService,
   ) {}
 
-  async createMedication(createMedicationDto: CreateMedicationModel, createReminderDto: CreateReminderDto[], createInventoryDto: CreateInventroyDto[]): Promise<Medication> {
+  async createMedication(
+    createMedicationDto: CreateMedicationModel,
+    createReminderDto: CreateReminderDto[],
+    createInventoryDto: CreateInventroyDto[],
+    createProgressLogDto: CreateProgressLogDto,
+  ): Promise<Medication> {
     try {
       const newMed = await this.prisma.medication.create({
         data: {
@@ -26,9 +34,11 @@ export class MedicationsService {
       });
 
       await Promise.all([
-         this.reminderService.createReminders(createReminderDto, newMed.id, createMedicationDto.user_id),
+        this.reminderService.createReminders(createReminderDto, newMed.id, createMedicationDto.user_id),
 
-         this.inventoryService.createInventory(createInventoryDto, newMed.id, createMedicationDto.user_id)
+        this.inventoryService.createInventory(createInventoryDto, newMed.id, createMedicationDto.user_id),
+
+        this.progressLogService.createLog(createProgressLogDto, newMed.id, createMedicationDto.user_id),
       ]);
 
       return newMed;
@@ -59,10 +69,13 @@ export class MedicationsService {
     }
   }
 
-  async getMedication(id: number): Promise<Medication> {
+  async getMedication(id: number, userId: number): Promise<Medication[]> {
     try {
-      const med = this.prisma.medication.findUniqueOrThrow({ where: { id } });
-      return med;
+      const meds = this.prisma.medication.findMany({ where: { AND: [
+        {id: id } , 
+        {user_id : userId}
+      ] }, include: { inventory: true, reminder: true } });
+      return meds;
     } catch (error) {
       if (error.code === "P2025") {
         throw new NotFoundException(`Medication with id ${id} not found`);
@@ -71,15 +84,21 @@ export class MedicationsService {
     }
   }
 
-  async fetchAllMedications(fetchMedicationsDto: FetchMedicationsDto): Promise<Medication[]> {
+  async fetchAllMedications(fetchMedicationsDto: FetchMedicationsDto): Promise<any> {
     try {
       await this.prisma.medication.findFirstOrThrow({ where: { user_id: fetchMedicationsDto.user_id } });
-      const meds = await this.prisma.medication.findMany({ where: fetchMedicationsDto });
+      const meds: Medication[] = await this.prisma.medication.findMany({
+        where: fetchMedicationsDto,
+        include: {
+          reminder: true,
+          inventory: true,
+        },
+      });
 
       return meds;
     } catch (error) {
       if (error.code === "P2025") {
-        throw new NotFoundException(`Medication with id ${fetchMedicationsDto.user_id} not found`);
+        throw new NotFoundException(`Medication with userID ${fetchMedicationsDto.user_id} not found`);
       }
       throw new HttpException(error, 500);
     }

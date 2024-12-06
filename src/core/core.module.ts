@@ -7,6 +7,7 @@ import { RemindersModule } from 'src/modules/reminders/reminders.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
 import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
+import { ProgresslogsModule } from 'src/modules/progresslogs/progresslogs.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
     UsersModule,
     MedicationsModule,
     RemindersModule,
+    ProgresslogsModule ,
     JwtModule.register({global: true}),
 ],
 exports: [PrismaService] ,

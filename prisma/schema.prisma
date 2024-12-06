@@ -36,6 +36,7 @@ model Medication {
   reminder     Reminder[]
   progress_log ProgressLog[]
   inventory    Inventory?
+  unit        String      @default("Pill")
   user         User          @relation(fields: [user_id], references: [id])
   user_id      Int          
   description  String?

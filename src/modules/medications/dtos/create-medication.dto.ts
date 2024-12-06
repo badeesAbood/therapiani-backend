@@ -1,6 +1,7 @@
 import { plainToClass, Transform } from "class-transformer";
 import { isISO8601 } from "class-validator";
 import { CreateInventroyDto } from "src/modules/inventories/dtos/create-inventory.dto";
+import { CreateProgressLogDto } from "src/modules/progresslogs/dtos/create-progresslog.dto";
 import { CreateReminderDto } from "src/modules/reminders/dtos/create-reminder.dto";
 
 
@@ -60,4 +61,6 @@ export class CreateMedRequest {
       }
     )
     inventories: CreateInventroyDto[] ; 
+
+    log: CreateProgressLogDto ; 
 }
